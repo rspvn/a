@@ -23,7 +23,7 @@ if exist "%folder%\%file%" (
         echo Download failed.
     )
     
-    :: Close CMD window after 5 seconds
+    :: Close BAT window after 5 seconds
     timeout /t 5 /nobreak >nul
     exit /b
 )
